@@ -1,9 +1,14 @@
+import { Provider } from "react-redux";
 import "./App.css";
+import CompaniesPage from "./views/CompaniesPage";
+import store from "./store";
 
 function App() {
   return (
     <>
-      <h1>SDP</h1>
+      <Provider store={store}>
+        <CompaniesPage></CompaniesPage>
+      </Provider>
     </>
   );
 }

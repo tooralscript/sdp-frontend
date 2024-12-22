@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Table } from "antd";
+import { Table, Tag } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { companiesRequestsList } from "../features/companies";
 
@@ -13,26 +13,31 @@ export default function CompaniesPage() {
 
   const columns = [
     {
-      title: "cik",
+      title: "cik".toUpperCase(),
       dataIndex: "cik",
       key: "cik",
+      render: (text, record) => <Tag color="blue">{text}</Tag>,
     },
     {
-      title: "ticker",
+      title: "ticker".toUpperCase(),
       dataIndex: "ticker",
       key: "ticker",
+      render: (text, record) => <Tag color="green">{text}</Tag>,
     },
     {
-      title: "name",
+      title: "name".toUpperCase(),
       dataIndex: "name",
       key: "name",
     },
   ];
   return (
     <Table
+      style={{ margin: "10px" }}
       columns={columns}
       dataSource={companies?.items}
       loading={companies.loading}
+      scroll={{ y: 600 }}
+      bordered={true}
     ></Table>
   );
 }

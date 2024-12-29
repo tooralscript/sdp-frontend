@@ -14,7 +14,6 @@ export const companiesRequestsList = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const response = await retrieveCompanies();
-      console.log(response);
       return response.data;
     } catch (err) {
       return rejectWithValue(err);

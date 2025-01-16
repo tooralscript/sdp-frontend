@@ -1,3 +1,5 @@
+#For production
+
 [[redirects]]
   from = "/api/*"
   to = "http://38.242.152.181:8080/api/:splat"

@@ -1,11 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { retrieveCompanies } from "../requests/requests";
-import axios from "axios";
 
 const initialState = {
   companies: {
     items: [],
     loading: false,
+    pagination: {},
   },
 };
 
@@ -31,7 +31,8 @@ export const companiesRequests = createSlice({
         state.companies.loading = true;
       })
       .addCase(companiesRequestsList.fulfilled, (state, action) => {
-        state.companies.items = action.payload;
+        state.companies.items = action.payload.data;
+        state.companies.pagination = action.payload.pagination;
         state.companies.loading = false;
       })
       .addCase(companiesRequestsList.rejected, (state, action) => {

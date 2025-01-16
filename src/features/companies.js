@@ -32,7 +32,6 @@ export const companiesRequests = createSlice({
       })
       .addCase(companiesRequestsList.fulfilled, (state, action) => {
         state.companies.items = action.payload;
-
         state.companies.loading = false;
       })
       .addCase(companiesRequestsList.rejected, (state, action) => {

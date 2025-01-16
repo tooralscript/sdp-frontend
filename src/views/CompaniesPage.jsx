@@ -30,6 +30,21 @@ export default function CompaniesPage() {
       key: "name",
     },
   ];
+
+  const handleTableChange = (pagination, filters, sorter) => {
+    if (pagination) {
+      handlePaginationChange(pagination);
+    }
+  };
+
+  const handlePaginationChange = (pagination) => {
+    dispatch(
+      companiesRequestsList({
+        page: pagination.current,
+        limit: pagination.pageSize,
+      })
+    );
+  };
   return (
     <Table
       style={{ margin: "10px" }}
@@ -38,6 +53,8 @@ export default function CompaniesPage() {
       loading={companies.loading}
       scroll={{ y: 600 }}
       bordered={true}
+      pagination={companies.pagination}
+      onChange={handleTableChange}
     ></Table>
   );
 }

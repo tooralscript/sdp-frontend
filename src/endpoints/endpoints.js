@@ -1,2 +1,2 @@
-const companiesEndpoint = "http://38.242.152.181:8080/api/companies";
+const companiesEndpoint = "/api/companies";
 export default companiesEndpoint;

@@ -14,7 +14,6 @@ export const companiesRequestsList = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const response = await retrieveCompanies();
-      console.log(response);
       return response.data;
     } catch (err) {
       return rejectWithValue(err);
@@ -33,7 +32,6 @@ export const companiesRequests = createSlice({
       })
       .addCase(companiesRequestsList.fulfilled, (state, action) => {
         state.companies.items = action.payload;
-
         state.companies.loading = false;
       })
       .addCase(companiesRequestsList.rejected, (state, action) => {

@@ -13,7 +13,7 @@ export const companiesRequestsList = createAsyncThunk(
   "contractRequestsList",
   async (data, { rejectWithValue }) => {
     try {
-      const response = await retrieveCompanies();
+      const response = await retrieveCompanies(data);
       return response.data;
     } catch (err) {
       return rejectWithValue(err);

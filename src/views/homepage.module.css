@@ -1,5 +1,5 @@
 .container {
-  border: 1px solid red;
+  /* border: 1px solid red; */
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -9,4 +9,5 @@
     rgb(22, 18, 90),
     rgb(32, 29, 112)
   );
+  padding: 12px;
 }

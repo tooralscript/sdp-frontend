@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Table, Tag } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { companiesRequestsList } from "../features/companies";
+import Navbar from "../components/navbar/Navbar";
 
 export default function CompaniesPage() {
   const dispatch = useDispatch();
@@ -46,15 +47,18 @@ export default function CompaniesPage() {
     );
   };
   return (
-    <Table
-      style={{ margin: "10px" }}
-      columns={columns}
-      dataSource={companies?.items}
-      loading={companies.loading}
-      scroll={{ y: 600 }}
-      bordered={true}
-      pagination={companies.pagination}
-      onChange={handleTableChange}
-    ></Table>
+    <>
+      <Navbar />
+      <Table
+        style={{ margin: "10px" }}
+        columns={columns}
+        dataSource={companies?.items}
+        loading={companies.loading}
+        scroll={{ y: 600 }}
+        bordered={true}
+        pagination={companies.pagination}
+        onChange={handleTableChange}
+      ></Table>
+    </>
   );
 }

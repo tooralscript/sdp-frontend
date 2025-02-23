@@ -19,8 +19,7 @@ function App() {
         <CssBaseline />
         <Router>
           <Routes>
-            <Route path="/" element={<Navigate to="/companies" replace />} />
-            <Route path="/companies" element={<CompaniesPage />} />
+            <Route path="/" element={<CompaniesPage />} />
             <Route
               path="/companies/:companyId/dashboard"
               element={<Dashboard />}

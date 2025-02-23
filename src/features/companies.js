@@ -7,6 +7,7 @@ const initialState = {
     loading: false,
     pagination: {},
   },
+  selectedCompany: null
 };
 
 export const companiesRequestsList = createAsyncThunk(
@@ -24,7 +25,11 @@ export const companiesRequestsList = createAsyncThunk(
 export const companiesRequests = createSlice({
   name: "contractRequests",
   initialState,
-  reducers: {},
+  reducers: {
+    setSelectedCompany: (state, action) => {
+      state.selectedCompany = action.payload;
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(companiesRequestsList.pending, (state, action) => {
@@ -41,4 +46,5 @@ export const companiesRequests = createSlice({
   },
 });
 
+export const { setSelectedCompany } = companiesRequests.actions;
 export default companiesRequests.reducer;

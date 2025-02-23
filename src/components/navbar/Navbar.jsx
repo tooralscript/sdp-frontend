@@ -120,22 +120,6 @@ export default function Navbar() {
             </Menu>
           </Box>
 
-          {/* Logo for mobile screens */}
-          <Typography
-            variant="h5"
-            noWrap
-            sx={{
-              mr: 2,
-              display: { xs: "flex", md: "none" },
-              flexGrow: 1,
-              fontWeight: 700,
-              color: theme.palette.primary.main,
-              textDecoration: "none",
-            }}
-          >
-            FA
-          </Typography>
-
           {/* Desktop menu */}
           <Box
             sx={{ flexGrow: 1, display: { xs: "none", md: "flex" }, gap: 2 }}

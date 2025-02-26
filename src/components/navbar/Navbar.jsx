@@ -26,7 +26,7 @@ import { Link, useLocation } from "react-router-dom";
 const pages = [
   {
     name: "Companies",
-    // path: "/companies",
+    path: "/",
     icon: <Business fontSize="small" />,
   },
 ];

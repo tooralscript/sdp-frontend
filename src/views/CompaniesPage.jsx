@@ -15,9 +15,16 @@ import {
   Typography,
   useTheme,
   CircularProgress,
+  TextField,
+  InputAdornment,
+  Button,
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import Navbar from "../components/navbar/Navbar";
-import { companiesRequestsList, setSelectedCompany } from "../features/companies";
+import {
+  companiesRequestsList,
+  setSelectedCompany,
+} from "../features/companies";
 
 const columns = [
   { id: "name", label: "Company Name", minWidth: 200 },
@@ -37,12 +44,14 @@ export default function CompaniesPage() {
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     dispatch(
       companiesRequestsList({
         page: page + 1,
         limit: rowsPerPage,
+        search: searchQuery,
       })
     );
   }, [dispatch, page, rowsPerPage]);
@@ -58,99 +67,170 @@ export default function CompaniesPage() {
 
   const handleRowClick = (company) => {
     // Store selected company data before navigation
-    dispatch(setSelectedCompany({
-      name: company.name,
-      ticker: company.ticker,
-      cik: company.cik
-    }));
+    dispatch(
+      setSelectedCompany({
+        name: company.name,
+        ticker: company.ticker,
+        cik: company.cik,
+      })
+    );
     navigate(`/companies/${company.cik}/dashboard`);
   };
 
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const handleSearch = () => {
+    setPage(0); // Reset to first page when searching
+    dispatch(
+      companiesRequestsList({
+        page: 1,
+        limit: rowsPerPage,
+        search: searchQuery,
+      })
+    );
+  };
+
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      handleSearch();
+    }
+  };
+
   return (
-    <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
+    <Box
+      sx={{
+        backgroundColor: "background.default",
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
       <Navbar />
-      <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+      <Container
+        maxWidth="lg"
+        sx={{
+          mt: 4,
+          mb: 4,
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
+        <Box sx={{ mb: 3 }}>
+          <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="Search companies..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              onKeyPress={handleKeyPress}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <Button
+              variant="contained"
+              onClick={handleSearch}
+              sx={{ minWidth: "120px" }}
+            >
+              Search
+            </Button>
+          </Box>
+        </Box>
         <Typography
           variant="h4"
           component="h1"
-          gutterBottom
-          color="text.primary"
+          sx={{ mb: 3, color: "text.primary" }}
         >
           Companies
         </Typography>
-
-        <Paper
+        <TableContainer
+          component={Paper}
           sx={{
-            width: "100%",
-            overflow: "hidden",
-            backgroundColor: "background.paper",
-            backgroundImage: "none",
+            flex: 1,
+            overflow: "auto",
+            minHeight: 0, // This is important for flex child to scroll
+            position: "relative", // Added for absolute positioning of spinner
           }}
         >
-          <TableContainer sx={{ maxHeight: "calc(100vh - 250px)" }}>
-            <Table stickyHeader>
-              <TableHead>
-                <TableRow>
-                  {columns.map((column) => (
-                    <TableCell
-                      key={column.id}
-                      style={{ minWidth: column.minWidth }}
-                      sx={{
-                        backgroundColor: "background.paper",
-                        fontWeight: "bold",
-                        color: "text.primary",
-                      }}
-                    >
-                      {column.label}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={columns.length} align="center">
-                      <CircularProgress />
-                    </TableCell>
+          {loading ? (
+            <Box
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1,
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          ) : null}
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
+                {columns.map((column) => (
+                  <TableCell
+                    key={column.id}
+                    style={{ minWidth: column.minWidth }}
+                    sx={{
+                      backgroundColor: "background.paper",
+                      fontWeight: "bold",
+                      color: "text.primary",
+                    }}
+                  >
+                    {column.label}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {!loading &&
+                companies?.map((company) => (
+                  <TableRow
+                    hover
+                    onClick={() => handleRowClick(company)}
+                    key={company.cik}
+                    sx={{
+                      cursor: "pointer",
+                      "&:hover": {
+                        backgroundColor: "action.hover",
+                      },
+                    }}
+                  >
+                    {columns.map((column) => (
+                      <TableCell key={column.id} sx={{ color: "text.primary" }}>
+                        {company[column.id]}
+                      </TableCell>
+                    ))}
                   </TableRow>
-                ) : (
-                  companies?.map((company) => (
-                    <TableRow
-                      hover
-                      onClick={() => handleRowClick(company)}
-                      key={company.cik}
-                      sx={{
-                        cursor: "pointer",
-                        "&:hover": {
-                          backgroundColor: "action.hover",
-                        },
-                      }}
-                    >
-                      {columns.map((column) => (
-                        <TableCell
-                          key={column.id}
-                          sx={{ color: "text.primary" }}
-                        >
-                          {company[column.id]}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <TablePagination
-            rowsPerPageOptions={[10, 25, 100]}
-            component="div"
-            count={pagination?.total || 0}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            sx={{ color: "text.primary" }}
-          />
-        </Paper>
+                ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[10, 25, 100]}
+          component="div"
+          count={pagination?.total || 0}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          sx={{ color: "text.primary" }}
+        />
       </Container>
     </Box>
   );

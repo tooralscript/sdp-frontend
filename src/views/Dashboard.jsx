@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
   Box,
   Card,
@@ -19,6 +19,8 @@ import {
 import { LineChart } from "@mui/x-charts";
 import { BarChart } from "@mui/x-charts";
 import Navbar from "../components/navbar/Navbar";
+
+import { totalSalesRequestList, resetTotalSales } from "../features/values";
 
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
 
@@ -57,11 +59,15 @@ export default function Dashboard() {
   const selectedCompany = useSelector(
     (state) => state.companies.selectedCompany
   );
+  const dispatch = useDispatch();
+
+  const { totalSales, loading } = useSelector((state) => state.values.values);
 
   // If no company is selected, redirect to companies page
   React.useEffect(() => {
+    dispatch(totalSalesRequestList({ cik: selectedCompany?.cik }));
     if (!selectedCompany) {
-      navigate("/companies");
+      navigate("/");
     }
   }, [selectedCompany, navigate]);
 
@@ -98,10 +104,11 @@ export default function Dashboard() {
         <Grid container spacing={3} sx={{ mb: 4 }}>
           <Grid item xs={12} sm={6} md={3}>
             <StatCard
-              title="Total Revenue"
-              value={financialData.stats.totalRevenue}
+              title="Total Sales"
+              value={totalSales}
               icon={<AttachMoney sx={{ color: "#2196f3" }} />}
               color="#2196f3"
+              loading={loading}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>

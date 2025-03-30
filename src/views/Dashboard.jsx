@@ -26,10 +26,15 @@ const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
 
 const StatCard = ({ title, value, icon, color }) => {
   return (
-    <Card sx={{ height: "100%" }}>
-      <CardContent>
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Box>
+    <Card sx={{ height: "100%", border: "1px solid yellow" }}>
+      <CardContent sx={{ width: "auto", border: "1px solid green" }}>
+        <Box
+          sx={{ border: "1px solid red  " }}
+          display="flex"
+          alignItems="flex-end"
+          justifyContent="space-between"
+        >
+          <Box sx={{ border: "1px solid white" }}>
             <Typography variant="subtitle2" color="textSecondary">
               {title}
             </Typography>
@@ -43,6 +48,7 @@ const StatCard = ({ title, value, icon, color }) => {
               borderRadius: "50%",
               padding: 1,
               display: "flex",
+              border: "1px solid red",
             }}
           >
             {icon}

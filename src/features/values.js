@@ -38,9 +38,10 @@ export const totalSalesRequests = createSlice({
         state.values.loading = true;
       })
       .addCase(totalSalesRequestList.fulfilled, (state, action) => {
-        console.log("Fulfilled payload:", action.payload);
         state.values.cik = action.payload.cik;
-        state.values.totalSales = action.payload.value;
+        const rawValue = parseFloat(action.payload.value);
+        const formattedValue = new Intl.NumberFormat("de-DE").format(rawValue);
+        state.values.totalSales = formattedValue;
         state.values.loading = false;
       })
       .addCase(totalSalesRequestList.rejected, (state, action) => {

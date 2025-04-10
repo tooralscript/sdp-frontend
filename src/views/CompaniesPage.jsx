@@ -202,7 +202,16 @@ export default function CompaniesPage() {
                 companies?.map((company) => (
                   <TableRow
                     hover
-                    onClick={() => handleRowClick(company)}
+                    onClick={(e) => {
+                      // Check if the user is selecting text
+                      const selection = window.getSelection();
+                      if (selection?.toString().length > 0) {
+                        return; // Skip the onClick logic if text is being selected
+                      }
+                      // e.stopPropagation();
+                      // e.preventDefault();
+                      handleRowClick(company);
+                    }}
                     key={company.cik}
                     sx={{
                       cursor: "pointer",

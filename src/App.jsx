@@ -21,7 +21,7 @@ function App() {
           <Routes>
             <Route path="/" element={<CompaniesPage />} />
             <Route
-              path="/companies/:companyId/dashboard"
+              path="/companies/:company_id/dashboard"
               element={<Dashboard />}
             />
           </Routes>

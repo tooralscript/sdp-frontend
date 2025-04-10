@@ -3,6 +3,7 @@ import { retrieveTotalSales } from "../requests/requests";
 
 const initialState = {
   values: {
+    data: [],
     cik: null,
     totalSales: null,
     loading: false,
@@ -15,7 +16,7 @@ export const totalSalesRequestList = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const response = await retrieveTotalSales(data);
-      console.log("Response data:", response);
+      // console.log("Response data:", response);
       return response.data;
     } catch (err) {
       return rejectWithValue(err);
@@ -34,14 +35,14 @@ export const totalSalesRequests = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(totalSalesRequestList.pending, (state, action) => {
-        console.log("pending");
         state.values.loading = true;
       })
       .addCase(totalSalesRequestList.fulfilled, (state, action) => {
-        state.values.cik = action.payload.cik;
-        const rawValue = parseFloat(action.payload.value);
-        const formattedValue = new Intl.NumberFormat("de-DE").format(rawValue);
-        state.values.totalSales = formattedValue;
+        // state.values.cik = action.payload.cik;
+        // const rawValue = parseFloat(action.payload.value);
+        // const formattedValue = new Intl.NumberFormat("de-DE").format(rawValue);
+        // state.values.totalSales = formattedValue;
+        state.values.data = action.payload;
         state.values.loading = false;
       })
       .addCase(totalSalesRequestList.rejected, (state, action) => {

@@ -45,6 +45,40 @@ export default function Dashboard() {
     (state) => state.values.values
   );
 
+  const firstYear = useMemo(() => {
+    if (!data?.length) {
+      return { year: null, value: null }; // Default values
+    }
+    return {
+      year: data[0]?.year,
+      value: new Intl.NumberFormat("de-DE").format(data[0]?.value),
+    };
+  }, [data]);
+
+  const secondYear = useMemo(() => {
+    if (!data?.length) {
+      return { year: null, value: null }; // Default values
+    }
+    return {
+      year: data[1]?.year,
+      value: new Intl.NumberFormat("de-DE").format(data[0]?.value),
+    };
+  }, [data]);
+
+  const thirdYear = useMemo(() => {
+    if (!data?.length) {
+      return { year: null, value: null }; // Default values
+    }
+    return {
+      year: data[2]?.year,
+      value: new Intl.NumberFormat("de-DE").format(data[0]?.value),
+    };
+  }, [data]);
+
+  const [totalSalesDisplayed, setTotalSalesDisplayed] = React.useState(
+    firstYear.value
+  );
+
   // If no company is selected, redirect to companies page
   useEffect(() => {
     dispatch(totalSalesRequestList({ cik: selectedCompany?.cik }));
@@ -67,37 +101,16 @@ export default function Dashboard() {
     // operatingIncome: [6800, 3800, 9800],
   };
 
-  const firstYear = useMemo(() => {
-    if (!data?.length) {
-      return { year: null, value: null }; // Default values
+  const handleYearChange = (year) => {
+    console.log(year);
+    if (year === 2022) {
+      setTotalSalesDisplayed(firstYear.value);
+    } else if (year === 2023) {
+      setTotalSalesDisplayed(secondYear.value);
+    } else {
+      setTotalSalesDisplayed(thirdYear.value);
     }
-    return {
-      year: data[0]?.year,
-      value: new Intl.NumberFormat("de-DE").format(data[0]?.value),
-    };
-  }, [data]);
-
-  const secondYear = useMemo(() => {
-    if (!data?.length) {
-      return { year: null, value: null }; // Default values
-    }
-    return {
-      year: data[0]?.year,
-      value: new Intl.NumberFormat("de-DE").format(data[0]?.value),
-    };
-  }, [data]);
-
-  const thirdYear = useMemo(() => {
-    if (!data?.length) {
-      return { year: null, value: null }; // Default values
-    }
-    return {
-      year: data[0]?.year,
-      value: new Intl.NumberFormat("de-DE").format(data[0]?.value),
-    };
-  }, [data]);
-
-  const handleYearChange = () => {};
+  };
 
   const StatCard = ({ title, value, icon, color }) => {
     return (
@@ -220,7 +233,7 @@ export default function Dashboard() {
           <Grid item xs={12} sm={6} md={3}>
             <StatCard
               title="Total Sales"
-              value={`$${firstYear.value}`}
+              value={`$${totalSalesDisplayed}`}
               icon={<CurrencyExchange sx={{ color: "#2196f3" }} />}
               color="#2196f3"
               loading={loading}
@@ -237,13 +250,11 @@ export default function Dashboard() {
                   Selected Year
                 </Typography>
                 <FormControl fullWidth>
-                  <InputLabel id="demo-simple-select-label">Age</InputLabel>
                   <Select
                     labelId="demo-simple-select-label"
                     id="demo-simple-select"
-                    sx={{ border: "1px solid red", height: "100%" }}
-                    label="Age"
-                    onChange={handleYearChange}
+                    sx={{ height: "32px", margin: "0px" }}
+                    onChange={(e) => handleYearChange(e.target.value)}
                     defaultValue={2022}
                   >
                     <MenuItem value={2022}>2022</MenuItem>

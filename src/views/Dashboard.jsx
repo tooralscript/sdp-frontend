@@ -28,7 +28,34 @@ import { BarChart } from "@mui/x-charts";
 import Navbar from "../components/navbar/Navbar";
 
 import { totalSalesRequestList, resetTotalSales } from "../features/values";
-import { current } from "@reduxjs/toolkit";
+
+import {
+  operatingIncomeRequestList,
+  resetOperatingIncome,
+} from "../features/operatingIncome";
+
+import {
+  currentAssetsRequestList,
+  resetCurrentAssets,
+} from "../features/currentAssets";
+
+import {
+  currentLiabilitiesRequestsList,
+  resetCurrentLiabilities,
+} from "../features/currentLiabilities";
+
+import {
+  totalAssetsRequestList,
+  resetTotalAssets,
+} from "../features/totalAssets";
+import {
+  totalEquityRequestList,
+  resetTotalEquity,
+} from "../features/totalEquity";
+import {
+  retainedEarningsRequestList,
+  resetRetainedEarnings,
+} from "../features/retainedEarnings";
 
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
 const years = ["2022", "2023", "2024"];
@@ -43,6 +70,20 @@ export default function Dashboard() {
 
   const { totalSales, loading, data } = useSelector(
     (state) => state.values.values
+  );
+
+  const { operatingIncome } = useSelector(
+    (state) => state.operatingIncome.values
+  );
+
+  const { currentAssets } = useSelector((state) => state.currentAssets.values);
+  const { currentLiabilities } = useSelector(
+    (state) => state.currentLiabilities.values
+  );
+  const { totalAssets } = useSelector((state) => state.totalAssets.values);
+  const { totalEquity } = useSelector((state) => state.totalEquity.values);
+  const { retainedEarnings } = useSelector(
+    (state) => state.retainedEarnings.values
   );
 
   const firstYear = useMemo(() => {
@@ -61,7 +102,7 @@ export default function Dashboard() {
     }
     return {
       year: data[1]?.year,
-      value: new Intl.NumberFormat("de-DE").format(data[0]?.value),
+      value: new Intl.NumberFormat("de-DE").format(data[1]?.value),
     };
   }, [data]);
 
@@ -71,17 +112,31 @@ export default function Dashboard() {
     }
     return {
       year: data[2]?.year,
-      value: new Intl.NumberFormat("de-DE").format(data[0]?.value),
+      value: new Intl.NumberFormat("de-DE").format(data[2]?.value),
     };
   }, [data]);
 
-  const [totalSalesDisplayed, setTotalSalesDisplayed] = React.useState(
-    firstYear.value
-  );
+  const [totalSalesDisplayed, setTotalSalesDisplayed] = React.useState();
+  const [operatingIncomeDisplayed, setOperatingIncomeDisplayed] =
+    React.useState();
+  const [currentAssetsDisplayed, setCurrentAssetsDisplayed] = React.useState();
+  const [currentLiabilitiesDisplayed, setCurrentLiabilitiesDisplayed] =
+    React.useState();
+  const [totalAssetsDisplayed, setTotalAssetsDisplayed] = React.useState();
+  const [totalEquityDisplayed, setTotalEquityDisplayed] = React.useState();
+  const [retainedEarningsDisplayed, setRetainedEarningsDisplayed] =
+    React.useState();
 
   // If no company is selected, redirect to companies page
   useEffect(() => {
     dispatch(totalSalesRequestList({ cik: selectedCompany?.cik }));
+    dispatch(operatingIncomeRequestList({ cik: selectedCompany?.cik }));
+    dispatch(currentAssetsRequestList({ cik: selectedCompany?.cik }));
+    dispatch(currentLiabilitiesRequestsList({ cik: selectedCompany?.cik }));
+    dispatch(totalAssetsRequestList({ cik: selectedCompany?.cik }));
+    dispatch(totalEquityRequestList({ cik: selectedCompany?.cik }));
+    dispatch(retainedEarningsRequestList({ cik: selectedCompany?.cik }));
+
     if (!selectedCompany) {
       navigate("/");
     }
@@ -90,6 +145,59 @@ export default function Dashboard() {
   if (!selectedCompany) {
     return null;
   }
+
+  // set local total sales with value
+  useEffect(() => {
+    setTotalSalesDisplayed(firstYear.value);
+  }, [data]);
+
+  useEffect(() => {
+    if (operatingIncome) {
+      setOperatingIncomeDisplayed(
+        new Intl.NumberFormat("de-DE").format(operatingIncome[0]?.value)
+      );
+    }
+  }, [operatingIncome]);
+
+  useEffect(() => {
+    if (currentAssets) {
+      setCurrentAssetsDisplayed(
+        new Intl.NumberFormat("de-DE").format(currentAssets[0]?.value)
+      );
+    }
+  }, [currentAssets]);
+
+  useEffect(() => {
+    if (currentLiabilities) {
+      setCurrentLiabilitiesDisplayed(
+        new Intl.NumberFormat("de-DE").format(currentLiabilities[0]?.value)
+      );
+    }
+  }, [currentLiabilities]);
+
+  useEffect(() => {
+    if (totalAssets) {
+      setTotalAssetsDisplayed(
+        new Intl.NumberFormat("de-DE").format(totalAssets[0]?.value)
+      );
+    }
+  }, [totalAssets]);
+
+  useEffect(() => {
+    if (totalEquity) {
+      setTotalEquityDisplayed(
+        new Intl.NumberFormat("de-DE").format(totalEquity[0]?.value)
+      );
+    }
+  }, [totalEquity]);
+
+  useEffect(() => {
+    if (retainedEarnings) {
+      setRetainedEarningsDisplayed(
+        new Intl.NumberFormat("de-DE").format(retainedEarnings[0]?.value)
+      );
+    }
+  }, [retainedEarnings]);
 
   const comparisonData = {
     currentAssets: [190867000000, 90867000000, 120867000000],
@@ -105,10 +213,64 @@ export default function Dashboard() {
     console.log(year);
     if (year === 2022) {
       setTotalSalesDisplayed(firstYear.value);
+      setOperatingIncomeDisplayed(
+        new Intl.NumberFormat("de-DE").format(operatingIncome[0]?.value)
+      );
+      setCurrentAssetsDisplayed(
+        new Intl.NumberFormat("de-DE").format(currentAssets[0]?.value)
+      );
+      setCurrentLiabilitiesDisplayed(
+        new Intl.NumberFormat("de-DE").format(currentLiabilities[0]?.value)
+      );
+      setTotalAssetsDisplayed(
+        new Intl.NumberFormat("de-DE").format(totalAssets[0]?.value)
+      );
+      setTotalEquityDisplayed(
+        new Intl.NumberFormat("de-DE").format(totalEquity[0]?.value)
+      );
+      setRetainedEarningsDisplayed(
+        new Intl.NumberFormat("de-DE").format(retainedEarnings[0]?.value)
+      );
     } else if (year === 2023) {
       setTotalSalesDisplayed(secondYear.value);
+      setOperatingIncomeDisplayed(
+        new Intl.NumberFormat("de-DE").format(operatingIncome[1]?.value)
+      );
+      setCurrentAssetsDisplayed(
+        new Intl.NumberFormat("de-DE").format(currentAssets[1]?.value)
+      );
+      setCurrentLiabilitiesDisplayed(
+        new Intl.NumberFormat("de-DE").format(currentLiabilities[1]?.value)
+      );
+      setTotalAssetsDisplayed(
+        new Intl.NumberFormat("de-DE").format(totalAssets[1]?.value)
+      );
+      setTotalEquityDisplayed(
+        new Intl.NumberFormat("de-DE").format(totalEquity[1]?.value)
+      );
+      setRetainedEarningsDisplayed(
+        new Intl.NumberFormat("de-DE").format(retainedEarnings[1]?.value)
+      );
     } else {
       setTotalSalesDisplayed(thirdYear.value);
+      setOperatingIncomeDisplayed(
+        new Intl.NumberFormat("de-DE").format(operatingIncome[2]?.value)
+      );
+      setCurrentAssetsDisplayed(
+        new Intl.NumberFormat("de-DE").format(currentAssets[2]?.value)
+      );
+      setCurrentLiabilitiesDisplayed(
+        new Intl.NumberFormat("de-DE").format(currentLiabilities[2]?.value)
+      );
+      setTotalAssetsDisplayed(
+        new Intl.NumberFormat("de-DE").format(totalAssets[2]?.value)
+      );
+      setTotalEquityDisplayed(
+        new Intl.NumberFormat("de-DE").format(totalEquity[2]?.value)
+      );
+      setRetainedEarningsDisplayed(
+        new Intl.NumberFormat("de-DE").format(retainedEarnings[2]?.value)
+      );
     }
   };
 
@@ -180,34 +342,37 @@ export default function Dashboard() {
             <StatCard
               title="Current Assets"
               // value={financialData.stats.totalExpenses}
-              value="$190.867.000.000"
+              value={`$ ${currentAssetsDisplayed}`}
               icon={<CandlestickChart sx={{ color: "#4caf50" }} />}
               color="#4caf50"
+              loading={loading}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <StatCard
               title="Current Liabilities"
               // value={financialData.stats.netProfit}
-              value="$179.431.000.000"
+              value={`$ ${currentLiabilitiesDisplayed}`}
               icon={<TrendingUp sx={{ color: "#4caf50" }} />}
               color="#4caf50"
+              loading={loading}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <StatCard
               title="Total Assets"
               // value={financialData.stats.profitMargin}
-              value="$624.894.000.000"
+              value={`$ ${totalAssetsDisplayed}`}
               icon={<ShowChart sx={{ color: "#ff9800" }} />}
               color="#ff9800"
+              loading={loading}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <StatCard
               title="Total Equity"
               // value={financialData.stats.totalExpenses}
-              value="$285.970.000.000"
+              value={`$ ${totalEquityDisplayed}`}
               icon={<AccountBalance sx={{ color: "#f44336" }} />}
               color="#f44336"
             />
@@ -216,24 +381,26 @@ export default function Dashboard() {
             <StatCard
               title="Retained Earnings"
               // value={financialData.stats.totalExpenses}
-              value="$172.866.000.000"
+              value={`$ ${retainedEarningsDisplayed}`}
               icon={<AccountBalance sx={{ color: "#f44336" }} />}
               color="#f44336"
+              loading={loading}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <StatCard
               title="Operating Income"
               // value={financialData.stats.totalExpenses}
-              value="$68.593.000.000"
+              value={`$ ${operatingIncomeDisplayed}`}
               icon={<AccountBalance sx={{ color: "#f44336" }} />}
               color="#f44336"
+              loading={loading}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <StatCard
               title="Total Sales"
-              value={`$${totalSalesDisplayed}`}
+              value={`$ ${totalSalesDisplayed}`}
               icon={<CurrencyExchange sx={{ color: "#2196f3" }} />}
               color="#2196f3"
               loading={loading}
@@ -311,13 +478,21 @@ export default function Dashboard() {
                   series={[
                     {
                       // data: financialData.revenue,
-                      data: comparisonData.currentAssets,
+                      data: [
+                        currentAssets[0]?.value,
+                        currentAssets[1]?.value,
+                        currentAssets[2]?.value,
+                      ],
                       label: "Current Assets",
                       color: theme.palette.primary.main,
                     },
                     {
                       // data: financialData.expenses,
-                      data: comparisonData.currentLiabilities,
+                      data: [
+                        currentLiabilities[0]?.value,
+                        currentLiabilities[1]?.value,
+                        currentLiabilities[2]?.value,
+                      ],
                       label: "Current Liabilities",
                       color: theme.palette.error.main,
                     },
@@ -363,7 +538,11 @@ export default function Dashboard() {
                       // data: financialData.revenue.map(
                       //   (rev, i) => rev - financialData.expenses[i]
                       // ),
-                      data: visualBarData.operatingIncome,
+                      data: [
+                        operatingIncome[0]?.value,
+                        operatingIncome[1]?.value,
+                        operatingIncome[2]?.value,
+                      ],
                       // label: "Operating Income",
                       color: theme.palette.success.main,
                     },

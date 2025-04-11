@@ -38,10 +38,6 @@ export const totalSalesRequests = createSlice({
         state.values.loading = true;
       })
       .addCase(totalSalesRequestList.fulfilled, (state, action) => {
-        // state.values.cik = action.payload.cik;
-        // const rawValue = parseFloat(action.payload.value);
-        // const formattedValue = new Intl.NumberFormat("de-DE").format(rawValue);
-        // state.values.totalSales = formattedValue;
         state.values.data = action.payload;
         state.values.loading = false;
       })
@@ -52,4 +48,4 @@ export const totalSalesRequests = createSlice({
 });
 
 export const { resetTotalSales } = totalSalesRequests.actions;
-export default totalSalesRequests.reducer;
+export const totalSalesReducer = totalSalesRequests.reducer;

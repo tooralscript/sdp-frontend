@@ -26,7 +26,7 @@ export const totalEquityRequests = createSlice({
   initialState,
   reducers: {
     resetTotalEquity: (state, action) => {
-      state.values.totalEquity = null;
+      state.values.totalEquity = [];
     },
   },
   extraReducers: (builder) => {

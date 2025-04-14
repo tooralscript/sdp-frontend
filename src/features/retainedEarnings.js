@@ -26,7 +26,7 @@ export const retainedEarningsRequests = createSlice({
   initialState,
   reducers: {
     resetRetainedEarnings: (state, action) => {
-      state.values.retainedEarnings = null;
+      state.values.retainedEarnings = [];
     },
   },
   extraReducers: (builder) => {

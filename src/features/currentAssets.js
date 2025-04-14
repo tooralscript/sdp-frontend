@@ -26,7 +26,7 @@ export const currentAssetsRequests = createSlice({
   initialState,
   reducers: {
     resetCurrentAssets: (state, action) => {
-      state.values.currentAssets = null;
+      state.values.currentAssets = [];
     },
   },
   extraReducers: (builder) => {

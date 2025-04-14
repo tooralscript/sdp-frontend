@@ -8,7 +8,6 @@ const initialState = {
     totalSales: null,
     loading: false,
   },
-  // selectedCompany: null,
 };
 
 export const totalSalesRequestList = createAsyncThunk(
@@ -16,7 +15,6 @@ export const totalSalesRequestList = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const response = await retrieveTotalSales(data);
-      // console.log("Response data:", response);
       return response.data;
     } catch (err) {
       return rejectWithValue(err);
@@ -29,7 +27,7 @@ export const totalSalesRequests = createSlice({
   initialState,
   reducers: {
     resetTotalSales: (state, action) => {
-      state.values.totalSales = null;
+      state.values.data = [];
     },
   },
   extraReducers: (builder) => {

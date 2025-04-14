@@ -529,6 +529,8 @@ export default function Dashboard() {
                         currentAssets[2]?.value,
                       ],
                       label: "Current Assets",
+                      valueFormatter: (value) =>
+                        Intl.NumberFormat("de-DE").format(value),
                       color: theme.palette.primary.main,
                     },
                     {
@@ -539,6 +541,8 @@ export default function Dashboard() {
                         currentLiabilities[2]?.value,
                       ],
                       label: "Current Liabilities",
+                      valueFormatter: (value) =>
+                        Intl.NumberFormat("de-DE").format(value),
                       color: theme.palette.error.main,
                     },
                   ]}
@@ -594,12 +598,14 @@ export default function Dashboard() {
                         operatingIncome[1]?.value,
                         operatingIncome[2]?.value,
                       ],
+                      valueFormatter: (value) =>
+                        Intl.NumberFormat("de-DE").format(value),
                       // label: "Operating Income",
                       color: theme.palette.success.main,
                     },
                   ]}
                   height={300}
-                  margin={{ top: 20, right: 20, bottom: 30, left: 40 }}
+                  margin={{ top: 20, right: 20, bottom: 30, left: 60 }}
                 />
               </CardContent>
             </Card>

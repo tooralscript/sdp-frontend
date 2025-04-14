@@ -239,6 +239,7 @@ export default function CompaniesPage() {
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
           sx={{ color: "text.primary" }}
+          disabled={loading}
         />
       </Container>
     </Box>

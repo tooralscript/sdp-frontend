@@ -26,7 +26,7 @@ export const operatingIncomeRequests = createSlice({
   initialState,
   reducers: {
     resetOperatingIncome: (state, action) => {
-      state.values.operatingIncome = null;
+      state.values.operatingIncome = [];
     },
   },
   extraReducers: (builder) => {

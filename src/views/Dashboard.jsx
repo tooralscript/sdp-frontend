@@ -129,22 +129,30 @@ export default function Dashboard() {
 
   // If no company is selected, redirect to companies page
   useEffect(() => {
-    dispatch(totalSalesRequestList({ cik: selectedCompany?.cik }));
-    dispatch(operatingIncomeRequestList({ cik: selectedCompany?.cik }));
-    dispatch(currentAssetsRequestList({ cik: selectedCompany?.cik }));
-    dispatch(currentLiabilitiesRequestsList({ cik: selectedCompany?.cik }));
-    dispatch(totalAssetsRequestList({ cik: selectedCompany?.cik }));
-    dispatch(totalEquityRequestList({ cik: selectedCompany?.cik }));
-    dispatch(retainedEarningsRequestList({ cik: selectedCompany?.cik }));
-
+    console.log(selectedCompany);
     if (!selectedCompany) {
       navigate("/");
     }
-  }, [selectedCompany, navigate]);
+    if (selectedCompany) {
+      dispatch(totalSalesRequestList({ cik: selectedCompany?.cik }));
+      dispatch(operatingIncomeRequestList({ cik: selectedCompany?.cik }));
+      dispatch(currentAssetsRequestList({ cik: selectedCompany?.cik }));
+      dispatch(currentLiabilitiesRequestsList({ cik: selectedCompany?.cik }));
+      dispatch(totalAssetsRequestList({ cik: selectedCompany?.cik }));
+      dispatch(totalEquityRequestList({ cik: selectedCompany?.cik }));
+      dispatch(retainedEarningsRequestList({ cik: selectedCompany?.cik }));
+    }
 
-  if (!selectedCompany) {
-    return null;
-  }
+    return () => {
+      dispatch(resetTotalSales());
+      dispatch(resetOperatingIncome());
+      dispatch(resetCurrentAssets());
+      dispatch(resetCurrentLiabilities());
+      dispatch(resetTotalAssets());
+      dispatch(resetTotalEquity());
+      dispatch(resetRetainedEarnings());
+    };
+  }, [selectedCompany, navigate]);
 
   // set local total sales with value
   useEffect(() => {
@@ -154,7 +162,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (operatingIncome) {
       setOperatingIncomeDisplayed(
-        new Intl.NumberFormat("de-DE").format(operatingIncome[0]?.value)
+        new Intl.NumberFormat("de-DE").format(operatingIncome[2]?.value)
       );
     }
   }, [operatingIncome]);
@@ -162,7 +170,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (currentAssets) {
       setCurrentAssetsDisplayed(
-        new Intl.NumberFormat("de-DE").format(currentAssets[0]?.value)
+        new Intl.NumberFormat("de-DE").format(currentAssets[2]?.value)
       );
     }
   }, [currentAssets]);
@@ -170,7 +178,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (currentLiabilities) {
       setCurrentLiabilitiesDisplayed(
-        new Intl.NumberFormat("de-DE").format(currentLiabilities[0]?.value)
+        new Intl.NumberFormat("de-DE").format(currentLiabilities[2]?.value)
       );
     }
   }, [currentLiabilities]);
@@ -178,7 +186,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (totalAssets) {
       setTotalAssetsDisplayed(
-        new Intl.NumberFormat("de-DE").format(totalAssets[0]?.value)
+        new Intl.NumberFormat("de-DE").format(totalAssets[2]?.value)
       );
     }
   }, [totalAssets]);
@@ -186,7 +194,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (totalEquity) {
       setTotalEquityDisplayed(
-        new Intl.NumberFormat("de-DE").format(totalEquity[0]?.value)
+        new Intl.NumberFormat("de-DE").format(totalEquity[2]?.value)
       );
     }
   }, [totalEquity]);
@@ -194,7 +202,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (retainedEarnings) {
       setRetainedEarningsDisplayed(
-        new Intl.NumberFormat("de-DE").format(retainedEarnings[0]?.value)
+        new Intl.NumberFormat("de-DE").format(retainedEarnings[2]?.value)
       );
     }
   }, [retainedEarnings]);
@@ -210,7 +218,6 @@ export default function Dashboard() {
   };
 
   const handleYearChange = (year) => {
-    console.log(year);
     if (year === 2022) {
       setTotalSalesDisplayed(firstYear.value);
       setOperatingIncomeDisplayed(
@@ -323,6 +330,46 @@ export default function Dashboard() {
     );
   };
 
+  // Combine all data points from both series
+  const allDataPoints = [
+    ...currentAssets?.map((item) => item?.value || 0),
+    ...currentLiabilities?.map((item) => item?.value || 0),
+  ];
+
+  // Calculate min and max values
+  const minValue = Math.min(...allDataPoints);
+  const maxValue = Math.max(...allDataPoints);
+
+  // Generate dynamic tick values
+  const generateTicks = (min, max, numTicks = 5) => {
+    const step = (max - min) / numTicks;
+    return Array.from({ length: numTicks + 1 }, (_, i) => min + i * step);
+  };
+
+  const tickValues = generateTicks(minValue, maxValue);
+
+  // Extract data points
+  const dataPointsArray = operatingIncome.map((item) => item?.value || 0);
+
+  // Calculate min and max values
+  const incomeMinValue = Math.min(...dataPointsArray);
+  const incomeMaxValue = Math.max(...dataPointsArray);
+
+  // Adjust min and max for better visualization
+  const adjustedMinValue = Math.min(incomeMinValue, 0); // Ensure 0 is included if data crosses zero
+  const adjustedMaxValue = Math.max(incomeMaxValue, 0); // Ensure 0 is included if data crosses zero
+
+  // Calculate absolute max for padding
+  const absoluteMax = Math.max(Math.abs(minValue), Math.abs(maxValue)) * 1.1;
+
+  // Generate dynamic tick values
+  const generateTickValues = (min, max, numTicks = 5) => {
+    const step = (max - min) / numTicks;
+    return Array.from({ length: numTicks + 1 }, (_, i) => min + i * step);
+  };
+
+  const tickValuesArray = generateTickValues(-absoluteMax, absoluteMax);
+
   return (
     <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
       <Navbar />
@@ -333,7 +380,7 @@ export default function Dashboard() {
           gutterBottom
           color="text.primary"
         >
-          {selectedCompany.name} ({selectedCompany.ticker})
+          {selectedCompany?.name} ({selectedCompany?.ticker})
         </Typography>
 
         {/* Stats Cards */}
@@ -422,11 +469,11 @@ export default function Dashboard() {
                     id="demo-simple-select"
                     sx={{ height: "32px", margin: "0px" }}
                     onChange={(e) => handleYearChange(e.target.value)}
-                    defaultValue={2022}
+                    defaultValue={2024}
                   >
-                    <MenuItem value={2022}>2022</MenuItem>
-                    <MenuItem value={2023}>2023</MenuItem>
                     <MenuItem value={2024}>2024</MenuItem>
+                    <MenuItem value={2023}>2023</MenuItem>
+                    <MenuItem value={2022}>2022</MenuItem>
                   </Select>
                 </FormControl>
               </CardContent>
@@ -436,7 +483,7 @@ export default function Dashboard() {
 
         {/* Charts */}
         <Grid container spacing={3}>
-          <Grid item xs={12} md={8}>
+          <Grid item xs={12} md={7}>
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom color="text.primary">
@@ -458,23 +505,21 @@ export default function Dashboard() {
                       tickLabelStyle: {
                         fill: theme.palette.text.secondary,
                       },
-                      tickValues: [0, 200e9, 400e9, 600e9, 800e9, 1000e9],
+                      tickValues: tickValues,
                       valueFormatter: (value) => {
                         if (value >= 1e12) {
                           return `${(value / 1e12).toFixed(1)}T`;
                         }
-                        return `${(value / 1e9).toFixed(0)}B`;
+                        if (value >= 1e9) {
+                          return `${(value / 1e9).toFixed(0)}B`;
+                        }
+                        if (value >= 1e6) {
+                          return `${(value / 1e6).toFixed(0)}M`;
+                        }
+                        return value.toString();
                       },
                     },
                   ]}
-                  sx={{
-                    ".MuiLineElement-root": {
-                      strokeWidth: 2,
-                    },
-                    ".MuiMarkElement-root": {
-                      stroke: "none",
-                    },
-                  }}
                   series={[
                     {
                       // data: financialData.revenue,
@@ -503,7 +548,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={5}>
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom color="text.primary">
@@ -524,12 +569,18 @@ export default function Dashboard() {
                       tickLabelStyle: {
                         fill: theme.palette.text.secondary,
                       },
-                      tickValues: [0, 200e9, 400e9, 600e9, 800e9, 1000e9],
+                      tickValues: tickValuesArray,
                       valueFormatter: (value) => {
-                        if (value >= 1e12) {
+                        if (value >= 1e12 || value <= -1e12) {
                           return `${(value / 1e12).toFixed(1)}T`;
                         }
-                        return `${(value / 1e9).toFixed(0)}B`;
+                        if (value >= 1e9 || value <= -1e9) {
+                          return `${(value / 1e9).toFixed(0)}B`;
+                        }
+                        if (value >= 1e6 || value <= -1e6) {
+                          return `${(value / 1e6).toFixed(0)}M`;
+                        }
+                        return value.toString();
                       },
                     },
                   ]}

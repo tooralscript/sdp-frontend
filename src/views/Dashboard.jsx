@@ -129,7 +129,6 @@ export default function Dashboard() {
 
   // If no company is selected, redirect to companies page
   useEffect(() => {
-    console.log(selectedCompany);
     if (!selectedCompany) {
       navigate("/");
     }

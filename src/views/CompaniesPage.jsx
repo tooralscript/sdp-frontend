@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Box,
@@ -18,12 +18,16 @@ import {
   TextField,
   InputAdornment,
   Button,
+  Checkbox,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import Navbar from "../components/navbar/Navbar";
 import {
   companiesRequestsList,
   setSelectedCompany,
+  setSelectedComparisonCompanies,
+  removeSelectedComparisonCompany,
+  setGlobalSearchValue,
 } from "../features/companies";
 
 const columns = [
@@ -33,27 +37,32 @@ const columns = [
 ];
 
 export default function CompaniesPage() {
-  const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
     items: companies,
     loading,
     pagination,
+    globalSearchValue,
   } = useSelector((state) => state.companies.companies);
+  const { selectedComparisonCompanies } = useSelector(
+    (state) => state.companies
+  );
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    dispatch(
-      companiesRequestsList({
-        page: page + 1,
-        limit: rowsPerPage,
-        search: searchQuery,
-      })
-    );
+    if (!(globalSearchValue && globalSearchValue !== searchQuery)) {
+      dispatch(
+        companiesRequestsList({
+          page: page + 1,
+          limit: rowsPerPage,
+          search: searchQuery,
+        })
+      );
+    }
   }, [dispatch, page, rowsPerPage]);
 
   const handleChangePage = (event, newPage) => {
@@ -74,7 +83,7 @@ export default function CompaniesPage() {
         cik: company.cik,
       })
     );
-    navigate(`/companies/${company.cik}/dashboard`);
+    navigate(`/companies/${company.cik}/dashboard?search=${searchQuery}`);
   };
 
   const handleSearchChange = (event) => {
@@ -83,6 +92,7 @@ export default function CompaniesPage() {
 
   const handleSearch = () => {
     setPage(0); // Reset to first page when searching
+    dispatch(setGlobalSearchValue(searchQuery));
     dispatch(
       companiesRequestsList({
         page: 1,
@@ -97,6 +107,69 @@ export default function CompaniesPage() {
       handleSearch();
     }
   };
+
+  const handleCheckboxClick = (event, company) => {
+    event.stopPropagation();
+
+    if (isCompanyChecked(company?.cik)) {
+      dispatch(removeSelectedComparisonCompany(company.cik));
+    }
+
+    if (selectedComparisonCompanies[0]?.cik === company.cik) {
+      return;
+    }
+
+    if (selectedComparisonCompanies[1]?.cik === company.cik) {
+      return;
+    }
+
+    dispatch(setSelectedComparisonCompanies(company));
+  };
+
+  const isCompanyChecked = (cik) => {
+    if (selectedComparisonCompanies.length >= 1) {
+      if (selectedComparisonCompanies[0]?.cik === cik) {
+        return true;
+      } else if (selectedComparisonCompanies[1]?.cik === cik) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+    return false;
+  };
+
+  const isCompanyDisabled = (cik) => {
+    if (selectedComparisonCompanies.length === 2) {
+      if (selectedComparisonCompanies[0].cik !== cik) {
+        return true;
+      } else if (selectedComparisonCompanies[1]?.cik !== cik) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+    return false;
+  };
+
+  const handleCompare = () => {
+    navigate(
+      `/companies/${selectedComparisonCompanies[0].cik}/${selectedComparisonCompanies[1].cik}/compare`
+    );
+  };
+
+  useEffect(() => {
+    if (globalSearchValue && globalSearchValue !== searchQuery) {
+      setSearchQuery(globalSearchValue);
+      dispatch(
+        companiesRequestsList({
+          page: 1,
+          limit: rowsPerPage,
+          search: globalSearchValue,
+        })
+      );
+    }
+  }, []);
 
   return (
     <Box
@@ -121,7 +194,7 @@ export default function CompaniesPage() {
         }}
       >
         <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+          <Box sx={{ display: "flex", gap: 1, mb: 2, height: "56px" }}>
             <TextField
               fullWidth
               variant="outlined"
@@ -140,19 +213,42 @@ export default function CompaniesPage() {
             <Button
               variant="contained"
               onClick={handleSearch}
-              sx={{ minWidth: "120px" }}
+              sx={{ minWidth: "120px", height: "56px" }}
             >
               Search
             </Button>
           </Box>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 1,
+              alignItems: "center",
+              height: "56px",
+            }}
+          >
+            <Typography
+              variant="h4"
+              component="h1"
+              sx={{
+                color: "text.primary",
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                height: "56px",
+              }}
+            >
+              Companies
+            </Typography>
+            <Button
+              variant="contained"
+              disabled={selectedComparisonCompanies.length !== 2}
+              onClick={handleCompare}
+              sx={{ minWidth: "120px", height: "56px" }}
+            >
+              Compare
+            </Button>
+          </Box>
         </Box>
-        <Typography
-          variant="h4"
-          component="h1"
-          sx={{ mb: 3, color: "text.primary" }}
-        >
-          Companies
-        </Typography>
         <TableContainer
           component={Paper}
           sx={{
@@ -179,7 +275,7 @@ export default function CompaniesPage() {
               <CircularProgress />
             </Box>
           ) : null}
-          <Table stickyHeader>
+          <Table checkboxSelection stickyHeader>
             <TableHead>
               <TableRow>
                 {columns.map((column) => (
@@ -195,52 +291,91 @@ export default function CompaniesPage() {
                     {column.label}
                   </TableCell>
                 ))}
+                <TableCell
+                  padding="checkbox"
+                  sx={{
+                    backgroundColor: "background.paper",
+                    fontWeight: "bold",
+                    color: "text.primary",
+                  }}
+                />
               </TableRow>
             </TableHead>
             <TableBody>
               {!loading &&
-                companies?.map((company) => (
-                  <TableRow
-                    hover
-                    onClick={(e) => {
-                      // Check if the user is selecting text
-                      const selection = window.getSelection();
-                      if (selection?.toString().length > 0) {
-                        return; // Skip the onClick logic if text is being selected
-                      }
-                      // e.stopPropagation();
-                      // e.preventDefault();
-                      handleRowClick(company);
-                    }}
-                    key={company.cik}
-                    sx={{
-                      cursor: "pointer",
-                      "&:hover": {
-                        backgroundColor: "action.hover",
-                      },
-                    }}
-                  >
-                    {columns.map((column) => (
-                      <TableCell key={column.id} sx={{ color: "text.primary" }}>
-                        {company[column.id]}
+                companies?.map((company) => {
+                  return (
+                    <TableRow
+                      hover
+                      onClick={(e) => {
+                        const selection = window.getSelection();
+                        if (selection?.toString().length > 0) {
+                          return;
+                        }
+                        handleRowClick(company);
+                      }}
+                      key={company.cik}
+                      sx={{
+                        cursor: "pointer",
+                        "&:hover": {
+                          backgroundColor: "action.hover",
+                        },
+                      }}
+                    >
+                      {columns.map((column) => (
+                        <TableCell
+                          key={column.id}
+                          sx={{ color: "text.primary" }}
+                        >
+                          {company[column.id]}
+                        </TableCell>
+                      ))}
+                      <TableCell padding="checkbox">
+                        <Checkbox
+                          checked={isCompanyChecked(company?.cik)}
+                          onClick={(e) => handleCheckboxClick(e, company)}
+                          disabled={
+                            isCompanyDisabled(company?.cik) &&
+                            !isCompanyChecked(company?.cik)
+                          }
+                        />
                       </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
+                    </TableRow>
+                  );
+                })}
             </TableBody>
           </Table>
         </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[10, 25, 100]}
-          component="div"
-          count={pagination?.total || 0}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          sx={{ color: "text.primary" }}
-          disabled={loading}
-        />
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mt: 2,
+          }}
+        >
+          <Typography sx={{}}>
+            {selectedComparisonCompanies?.length >= 1 && (
+              <span>
+                Selected companies for comparison:{" "}
+                {selectedComparisonCompanies?.[0]?.name}
+                {selectedComparisonCompanies?.[1] &&
+                  ` and ${selectedComparisonCompanies?.[1]?.name}`}
+              </span>
+            )}
+          </Typography>
+          <TablePagination
+            rowsPerPageOptions={[10, 25, 100]}
+            component="div"
+            count={pagination?.total || 0}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            sx={{ color: "text.primary" }}
+            disabled={loading}
+          />
+        </Box>
       </Container>
     </Box>
   );

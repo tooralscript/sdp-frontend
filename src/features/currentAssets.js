@@ -4,6 +4,7 @@ import { retrieveCurrentAssets } from "../requests/requests";
 const initialState = {
   values: {
     currentAssets: [],
+    comparisonCurrentAssets: [],
     cik: null,
     loading: false,
   },
@@ -28,6 +29,9 @@ export const currentAssetsRequests = createSlice({
     resetCurrentAssets: (state, action) => {
       state.values.currentAssets = [];
     },
+    resetComparisonCurrentAssets: (state, action) => {
+      state.values.comparisonCurrentAssets = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -36,7 +40,10 @@ export const currentAssetsRequests = createSlice({
       })
       .addCase(currentAssetsRequestList.fulfilled, (state, action) => {
         state.values.currentAssets = action.payload;
-
+        state.values.comparisonCurrentAssets = [
+          ...state.values.comparisonCurrentAssets,
+          ...action.payload,
+        ];
         state.values.loading = false;
       })
       .addCase(currentAssetsRequestList.rejected, (state, action) => {
@@ -45,6 +52,7 @@ export const currentAssetsRequests = createSlice({
   },
 });
 
-export const { resetCurrentAssets } = currentAssetsRequests.actions;
+export const { resetCurrentAssets, resetComparisonCurrentAssets } =
+  currentAssetsRequests.actions;
 
 export const currentAssetsReducer = currentAssetsRequests.reducer;

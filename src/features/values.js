@@ -4,6 +4,7 @@ import { retrieveTotalSales } from "../requests/requests";
 const initialState = {
   values: {
     data: [],
+    comparisonTotalSales: [],
     cik: null,
     totalSales: null,
     loading: false,
@@ -29,6 +30,9 @@ export const totalSalesRequests = createSlice({
     resetTotalSales: (state, action) => {
       state.values.data = [];
     },
+    resetComparisonTotalesales: (state, action) => {
+      state.values.comparisonTotalSales = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -37,6 +41,10 @@ export const totalSalesRequests = createSlice({
       })
       .addCase(totalSalesRequestList.fulfilled, (state, action) => {
         state.values.data = action.payload;
+        state.values.comparisonTotalSales = [
+          ...state.values.comparisonTotalSales,
+          ...action.payload,
+        ];
         state.values.loading = false;
       })
       .addCase(totalSalesRequestList.rejected, (state, action) => {
@@ -45,5 +53,6 @@ export const totalSalesRequests = createSlice({
   },
 });
 
-export const { resetTotalSales } = totalSalesRequests.actions;
+export const { resetTotalSales, resetComparisonTotalesales } =
+  totalSalesRequests.actions;
 export const totalSalesReducer = totalSalesRequests.reducer;

@@ -4,6 +4,7 @@ import { retrieveCurrentLiabilities } from "../requests/requests";
 const initialState = {
   values: {
     currentLiabilities: [],
+    comparisonCurrentLiabilities: [],
     cik: null,
     loading: false,
   },
@@ -28,6 +29,9 @@ export const currentLiabilitiesRequests = createSlice({
     resetCurrentLiabilities: (state, action) => {
       state.values.currentLiabilities = [];
     },
+    resetComparisonCurrentLiabilities: (state, action) => {
+      state.values.comparisonCurrentLiabilities = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -36,6 +40,10 @@ export const currentLiabilitiesRequests = createSlice({
       })
       .addCase(currentLiabilitiesRequestsList.fulfilled, (state, action) => {
         state.values.currentLiabilities = action.payload;
+        state.values.comparisonCurrentLiabilities = [
+          ...state.values.comparisonCurrentLiabilities,
+          ...action.payload,
+        ];
         state.values.loading = false;
       })
       .addCase(currentLiabilitiesRequestsList.rejected, (state, action) => {
@@ -44,6 +52,7 @@ export const currentLiabilitiesRequests = createSlice({
   },
 });
 
-export const { resetCurrentLiabilities } = currentLiabilitiesRequests.actions;
+export const { resetCurrentLiabilities, resetComparisonCurrentLiabilities } =
+  currentLiabilitiesRequests.actions;
 
 export const currentLiabilitiesReducer = currentLiabilitiesRequests.reducer;

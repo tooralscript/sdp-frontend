@@ -9,13 +9,10 @@ import {
   MenuItem,
   Container,
   Button,
-  Tooltip,
-  Avatar,
   useTheme,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
-  Dashboard,
   Business,
   Person,
   Settings,
@@ -41,12 +38,9 @@ export default function Navbar() {
   const theme = useTheme();
   const location = useLocation();
   const [anchorElNav, setAnchorElNav] = useState(null);
-  const [anchorElUser, setAnchorElUser] = useState(null);
 
   const handleOpenNavMenu = (event) => setAnchorElNav(event.currentTarget);
-  const handleOpenUserMenu = (event) => setAnchorElUser(event.currentTarget);
   const handleCloseNavMenu = () => setAnchorElNav(null);
-  const handleCloseUserMenu = () => setAnchorElUser(null);
 
   return (
     <AppBar

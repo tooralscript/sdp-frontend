@@ -6,9 +6,9 @@ import {
 } from "react-router-dom";
 import { Provider } from "react-redux";
 import { ThemeProvider, CssBaseline } from "@mui/material";
-import "./App.css";
 import CompaniesPage from "./views/CompaniesPage";
 import Dashboard from "./views/Dashboard";
+import Compare from "./views/Compare";
 import store from "./store";
 import { theme } from "./theme";
 
@@ -23,6 +23,10 @@ function App() {
             <Route
               path="/companies/:company_id/dashboard"
               element={<Dashboard />}
+            />
+            <Route
+              path="/companies/:company_1_id/:company_2_id/compare"
+              element={<Compare />}
             />
           </Routes>
         </Router>

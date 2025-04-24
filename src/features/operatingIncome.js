@@ -4,6 +4,7 @@ import { retrieveOperatingIncome } from "../requests/requests";
 const initialState = {
   values: {
     operatingIncome: [],
+    comparisonOperatingIncome: [],
     cik: null,
     loading: false,
   },
@@ -28,6 +29,9 @@ export const operatingIncomeRequests = createSlice({
     resetOperatingIncome: (state, action) => {
       state.values.operatingIncome = [];
     },
+    resetComparisonOperatingIncome: (state, action) => {
+      state.values.comparisonOperatingIncome = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -36,7 +40,10 @@ export const operatingIncomeRequests = createSlice({
       })
       .addCase(operatingIncomeRequestList.fulfilled, (state, action) => {
         state.values.operatingIncome = action.payload;
-
+        state.values.comparisonOperatingIncome = [
+          ...state.values.comparisonOperatingIncome,
+          ...action.payload,
+        ];
         state.values.loading = false;
       })
       .addCase(operatingIncomeRequestList.rejected, (state, action) => {
@@ -45,6 +52,7 @@ export const operatingIncomeRequests = createSlice({
   },
 });
 
-export const { resetOperatingIncome } = operatingIncomeRequests.actions;
+export const { resetOperatingIncome, resetComparisonOperatingIncome } =
+  operatingIncomeRequests.actions;
 
 export const operatingIncomeReducer = operatingIncomeRequests.reducer;

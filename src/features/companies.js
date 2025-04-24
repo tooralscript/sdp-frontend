@@ -6,8 +6,10 @@ const initialState = {
     items: [],
     loading: false,
     pagination: {},
+    globalSearchValue: "",
   },
-  selectedCompany: null
+  selectedCompany: null,
+  selectedComparisonCompanies: [],
 };
 
 export const companiesRequestsList = createAsyncThunk(
@@ -28,7 +30,19 @@ export const companiesRequests = createSlice({
   reducers: {
     setSelectedCompany: (state, action) => {
       state.selectedCompany = action.payload;
-    }
+    },
+    setSelectedComparisonCompanies: (state, action) => {
+      state.selectedComparisonCompanies.push(action.payload);
+    },
+    removeSelectedComparisonCompany: (state, action) => {
+      state.selectedComparisonCompanies =
+        state.selectedComparisonCompanies.filter(
+          (company) => company.cik !== action.payload
+        );
+    },
+    setGlobalSearchValue: (state, action) => {
+      state.companies.globalSearchValue = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -46,5 +60,10 @@ export const companiesRequests = createSlice({
   },
 });
 
-export const { setSelectedCompany } = companiesRequests.actions;
+export const {
+  setSelectedCompany,
+  setSelectedComparisonCompanies,
+  removeSelectedComparisonCompany,
+  setGlobalSearchValue,
+} = companiesRequests.actions;
 export default companiesRequests.reducer;

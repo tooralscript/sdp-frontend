@@ -4,6 +4,7 @@ import { retrieveRetainedEarnings } from "../requests/requests";
 const initialState = {
   values: {
     retainedEarnings: [],
+    comparisonRetainedEarnings: [],
     cik: null,
     loading: false,
   },
@@ -28,6 +29,9 @@ export const retainedEarningsRequests = createSlice({
     resetRetainedEarnings: (state, action) => {
       state.values.retainedEarnings = [];
     },
+    resetComparisonRetainedEarnings: (state, action) => {
+      state.values.comparisonRetainedEarnings = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -36,6 +40,10 @@ export const retainedEarningsRequests = createSlice({
       })
       .addCase(retainedEarningsRequestList.fulfilled, (state, action) => {
         state.values.retainedEarnings = action.payload;
+        state.values.comparisonRetainedEarnings = [
+          ...state.values.comparisonRetainedEarnings,
+          ...action.payload,
+        ];
         state.values.loading = false;
       })
       .addCase(retainedEarningsRequestList.rejected, (state, action) => {
@@ -44,6 +52,7 @@ export const retainedEarningsRequests = createSlice({
   },
 });
 
-export const { resetRetainedEarnings } = retainedEarningsRequests.actions;
+export const { resetRetainedEarnings, resetComparisonRetainedEarnings } =
+  retainedEarningsRequests.actions;
 
 export const retainedEarningsReducer = retainedEarningsRequests.reducer;

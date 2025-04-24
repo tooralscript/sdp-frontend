@@ -155,7 +155,7 @@ export default function Dashboard() {
 
   // set local total sales with value
   useEffect(() => {
-    setTotalSalesDisplayed(firstYear.value);
+    setTotalSalesDisplayed(thirdYear.value);
   }, [data]);
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -10,6 +10,7 @@ import {
   Typography,
   useTheme,
   CircularProgress,
+  Button,
 } from "@mui/material";
 import { LineChart } from "@mui/x-charts";
 import Navbar from "../components/navbar/Navbar";
@@ -54,6 +55,8 @@ import {
   resetComparisonRetainedEarnings,
 } from "../features/retainedEarnings";
 
+import { GoogleGenAI } from "@google/genai";
+
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
 const years = ["2022", "2023", "2024"];
 
@@ -91,6 +94,8 @@ export default function Compare() {
   const { retainedEarnings, comparisonRetainedEarnings } = useSelector(
     (state) => state.retainedEarnings.values
   );
+
+  const [geminiResponse, setGeminiResponse] = useState("");
 
   const firstYear = useMemo(() => {
     if (!data?.length) {
@@ -132,6 +137,126 @@ export default function Compare() {
   const [totalEquityDisplayed, setTotalEquityDisplayed] = React.useState();
   const [retainedEarningsDisplayed, setRetainedEarningsDisplayed] =
     React.useState();
+
+  const ai = new GoogleGenAI({
+    apiKey: "AIzaSyA4op9IlAl_9ax7vgKmaNvTIDJyODbk_Wc",
+  });
+
+  async function main() {
+    const payload = {
+      companies: {
+        company1: selectedComparisonCompanies?.[0]?.name,
+        company2: selectedComparisonCompanies?.[1]?.name,
+      },
+      currentAssets: {
+        company1: comparisonCurrentAssets?.slice(0, 3),
+        company2: comparisonCurrentAssets?.slice(3, 6),
+      },
+      currentLiabilities: {
+        company1: comparisonCurrentLiabilities?.slice(0, 3),
+        company2: comparisonCurrentLiabilities?.slice(3, 6),
+      },
+      totalAssets: {
+        company1: comparisonTotalAssets?.slice(0, 3),
+        company2: comparisonTotalAssets?.slice(3, 6),
+      },
+      totalEquity: {
+        company1: comparisonTotalEquity?.slice(0, 3),
+        company2: comparisonTotalEquity?.slice(3, 6),
+      },
+      retainedEarnings: {
+        company1: comparisonRetainedEarnings?.slice(0, 3),
+        company2: comparisonRetainedEarnings?.slice(3, 6),
+      },
+      totalSales: {
+        company1: comparisonTotalSales?.slice(0, 3),
+        company2: comparisonTotalSales?.slice(3, 6),
+      },
+      operatingIncome: {
+        company1: comparisonOperatingIncome?.slice(0, 3),
+        company2: comparisonOperatingIncome?.slice(3, 6),
+      },
+    };
+
+    const promptString = `Compare ${payload.companies.company1} and ${
+      payload.companies.company2
+    } based on their financial metrics over the last three years:
+
+Current Assets:
+${payload.companies.company1}: ${payload.currentAssets.company1
+      .map((item) => item.value)
+      .join(", ")}
+${payload.companies.company2}: ${payload.currentAssets.company2
+      .map((item) => item.value)
+      .join(", ")}
+
+Current Liabilities:
+${payload.companies.company1}: ${payload.currentLiabilities.company1
+      .map((item) => item.value)
+      .join(", ")}
+${payload.companies.company2}: ${payload.currentLiabilities.company2
+      .map((item) => item.value)
+      .join(", ")}
+
+Total Assets:
+${payload.companies.company1}: ${payload.totalAssets.company1
+      .map((item) => item.value)
+      .join(", ")}
+${payload.companies.company2}: ${payload.totalAssets.company2
+      .map((item) => item.value)
+      .join(", ")}
+
+Total Equity:
+${payload.companies.company1}: ${payload.totalEquity.company1
+      .map((item) => item.value)
+      .join(", ")}
+${payload.companies.company2}: ${payload.totalEquity.company2
+      .map((item) => item.value)
+      .join(", ")}
+
+Retained Earnings:
+${payload.companies.company1}: ${payload.retainedEarnings.company1
+      .map((item) => item.value)
+      .join(", ")}
+${payload.companies.company2}: ${payload.retainedEarnings.company2
+      .map((item) => item.value)
+      .join(", ")}
+
+Total Sales:
+${payload.companies.company1}: ${payload.totalSales.company1
+      .map((item) => item.value)
+      .join(", ")}
+${payload.companies.company2}: ${payload.totalSales.company2
+      .map((item) => item.value)
+      .join(", ")}
+
+Operating Income:
+${payload.companies.company1}: ${payload.operatingIncome.company1
+      .map((item) => item.value)
+      .join(", ")}
+${payload.companies.company2}: ${payload.operatingIncome.company2
+      .map((item) => item.value)
+      .join(", ")}
+
+Give a very short analysis of these companies' financial performance, and do not use words like okay let me think and so on, just give academically written statement, 150 words.`;
+
+    console.log(promptString);
+
+    const response = await ai.models.generateContentStream({
+      model: "gemini-2.0-flash",
+      contents: promptString,
+    });
+
+    let fullResponse = "";
+    for await (const chunk of response) {
+      fullResponse += chunk.text;
+      setGeminiResponse(fullResponse);
+    }
+  }
+
+  useEffect(() => {
+    console.log(comparisonCurrentAssets);
+  }, [comparisonCurrentAssets]);
 
   useEffect(() => {
     if (selectedComparisonCompanies) {
@@ -233,8 +358,6 @@ export default function Compare() {
       dispatch(resetComparisonRetainedEarnings());
     };
   }, [selectedCompany, navigate]);
-
-  // set local total sales with value
   useEffect(() => {
     setTotalSalesDisplayed(firstYear.value);
   }, [data]);
@@ -293,17 +416,14 @@ export default function Compare() {
     }
   }, [selectedComparisonCompanies, navigate]);
 
-  // Combine all data points from both series
   const allDataPoints = [
     ...currentAssets?.map((item) => item?.value || 0),
     ...currentLiabilities?.map((item) => item?.value || 0),
   ];
 
-  // Calculate min and max values
   const minValue = Math.min(...allDataPoints);
   const maxValue = Math.max(...allDataPoints);
 
-  // Generate dynamic tick values
   const generateTicks = (min, max, numTicks = 5) => {
     const step = (max - min) / numTicks;
     return Array.from({ length: numTicks + 1 }, (_, i) => min + i * step);
@@ -311,21 +431,16 @@ export default function Compare() {
 
   const tickValues = generateTicks(minValue, maxValue);
 
-  // Extract data points
   const dataPointsArray = operatingIncome.map((item) => item?.value || 0);
 
-  // Calculate min and max values
   const incomeMinValue = Math.min(...dataPointsArray);
   const incomeMaxValue = Math.max(...dataPointsArray);
 
-  // Adjust min and max for better visualization
-  const adjustedMinValue = Math.min(incomeMinValue, 0); // Ensure 0 is included if data crosses zero
-  const adjustedMaxValue = Math.max(incomeMaxValue, 0); // Ensure 0 is included if data crosses zero
+  const adjustedMinValue = Math.min(incomeMinValue, 0);
+  const adjustedMaxValue = Math.max(incomeMaxValue, 0);
 
-  // Calculate absolute max for padding
   const absoluteMax = Math.max(Math.abs(minValue), Math.abs(maxValue)) * 1.1;
 
-  // Generate dynamic tick values
   const generateTickValues = (min, max, numTicks = 5) => {
     const step = (max - min) / numTicks;
     return Array.from({ length: numTicks + 1 }, (_, i) => min + i * step);
@@ -344,29 +459,10 @@ export default function Compare() {
           color="text.primary"
           sx={{ display: "flex", alignItems: "center", gap: 2 }}
         >
-          {selectedComparisonCompanies?.[0]?.name}
-          {/* <Box
-            sx={{
-              width: 20,
-              height: 20,
-              backgroundColor: theme.palette.primary.main,
-              borderRadius: 1,
-            }}
-          /> */}
-          vs {selectedComparisonCompanies?.[1]?.name}
-          {/* <Box
-            sx={{
-              width: 20,
-              height: 20,
-              backgroundColor: theme.palette.error.main,
-              borderRadius: 1,
-            }}
-          /> */}
+          {selectedComparisonCompanies?.[0]?.name} vs{" "}
+          {selectedComparisonCompanies?.[1]?.name}
         </Typography>
 
-        {/* Stats Cards */}
-
-        {/* Charts */}
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <Card>
@@ -377,7 +473,6 @@ export default function Compare() {
                 <LineChart
                   xAxis={[
                     {
-                      // data: months,
                       data: years,
                       scaleType: "band",
                       tickLabelStyle: {
@@ -407,22 +502,18 @@ export default function Compare() {
                   ]}
                   series={[
                     {
-                      // data: financialData.revenue,
                       data: [
                         comparisonCurrentAssets[0]?.value,
                         comparisonCurrentAssets[1]?.value,
                         comparisonCurrentAssets[2]?.value,
                       ],
                       label: `${selectedComparisonCompanies?.[0]?.name}`,
-                      // label: "Current Assets",
+
                       valueFormatter: (value) =>
                         Intl.NumberFormat("de-DE").format(value),
                       color: theme.palette.primary.main,
-                      // showMark: true,
-                      // showValue: true,
                     },
                     {
-                      // data: financialData.expenses,
                       data: [
                         comparisonCurrentAssets[3]?.value,
                         comparisonCurrentAssets[4]?.value,
@@ -430,7 +521,6 @@ export default function Compare() {
                       ],
                       label: `${selectedComparisonCompanies?.[1]?.name}`,
 
-                      // label: "Current Liabilities",
                       valueFormatter: (value) =>
                         Intl.NumberFormat("de-DE").format(value),
                       color: theme.palette.error.main,
@@ -451,7 +541,6 @@ export default function Compare() {
                 <LineChart
                   xAxis={[
                     {
-                      // data: months,
                       data: years,
                       scaleType: "band",
                       tickLabelStyle: {
@@ -481,7 +570,6 @@ export default function Compare() {
                   ]}
                   series={[
                     {
-                      // data: financialData.revenue,
                       data: [
                         comparisonCurrentLiabilities[0]?.value,
                         comparisonCurrentLiabilities[1]?.value,
@@ -489,13 +577,11 @@ export default function Compare() {
                       ],
                       label: `${selectedComparisonCompanies?.[0]?.name}`,
 
-                      // label: "Current Assets",
                       valueFormatter: (value) =>
                         Intl.NumberFormat("de-DE").format(value),
                       color: theme.palette.primary.main,
                     },
                     {
-                      // data: financialData.expenses,
                       data: [
                         comparisonCurrentLiabilities[3]?.value,
                         comparisonCurrentLiabilities[4]?.value,
@@ -503,7 +589,6 @@ export default function Compare() {
                       ],
                       label: `${selectedComparisonCompanies?.[1]?.name}`,
 
-                      // label: "Current Liabilities",
                       valueFormatter: (value) =>
                         Intl.NumberFormat("de-DE").format(value),
                       color: theme.palette.error.main,
@@ -524,7 +609,6 @@ export default function Compare() {
                 <LineChart
                   xAxis={[
                     {
-                      // data: months,
                       data: years,
                       scaleType: "band",
                       tickLabelStyle: {
@@ -554,7 +638,6 @@ export default function Compare() {
                   ]}
                   series={[
                     {
-                      // data: financialData.revenue,
                       data: [
                         comparisonTotalAssets[0]?.value,
                         comparisonTotalAssets[1]?.value,
@@ -562,13 +645,11 @@ export default function Compare() {
                       ],
                       label: `${selectedComparisonCompanies?.[0]?.name}`,
 
-                      // label: "Current Assets",
                       valueFormatter: (value) =>
                         Intl.NumberFormat("de-DE").format(value),
                       color: theme.palette.primary.main,
                     },
                     {
-                      // data: financialData.expenses,
                       data: [
                         comparisonTotalAssets[3]?.value,
                         comparisonTotalAssets[4]?.value,
@@ -576,7 +657,6 @@ export default function Compare() {
                       ],
                       label: `${selectedComparisonCompanies?.[1]?.name}`,
 
-                      // label: "Current Liabilities",
                       valueFormatter: (value) =>
                         Intl.NumberFormat("de-DE").format(value),
                       color: theme.palette.error.main,
@@ -597,7 +677,6 @@ export default function Compare() {
                 <LineChart
                   xAxis={[
                     {
-                      // data: months,
                       data: years,
                       scaleType: "band",
                       tickLabelStyle: {
@@ -627,7 +706,6 @@ export default function Compare() {
                   ]}
                   series={[
                     {
-                      // data: financialData.revenue,
                       data: [
                         comparisonTotalEquity[0]?.value,
                         comparisonTotalEquity[1]?.value,
@@ -635,13 +713,11 @@ export default function Compare() {
                       ],
                       label: `${selectedComparisonCompanies?.[0]?.name}`,
 
-                      // label: "Current Assets",
                       valueFormatter: (value) =>
                         Intl.NumberFormat("de-DE").format(value),
                       color: theme.palette.primary.main,
                     },
                     {
-                      // data: financialData.expenses,
                       data: [
                         comparisonTotalEquity[3]?.value,
                         comparisonTotalEquity[4]?.value,
@@ -649,7 +725,6 @@ export default function Compare() {
                       ],
                       label: `${selectedComparisonCompanies?.[1]?.name}`,
 
-                      // label: "Current Liabilities",
                       valueFormatter: (value) =>
                         Intl.NumberFormat("de-DE").format(value),
                       color: theme.palette.error.main,
@@ -670,7 +745,6 @@ export default function Compare() {
                 <LineChart
                   xAxis={[
                     {
-                      // data: months,
                       data: years,
                       scaleType: "band",
                       tickLabelStyle: {
@@ -700,7 +774,6 @@ export default function Compare() {
                   ]}
                   series={[
                     {
-                      // data: financialData.revenue,
                       data: [
                         comparisonRetainedEarnings[0]?.value,
                         comparisonRetainedEarnings[1]?.value,
@@ -710,13 +783,11 @@ export default function Compare() {
                       showValue: true,
                       label: `${selectedComparisonCompanies?.[0]?.name}`,
 
-                      // label: "Current Assets",
                       valueFormatter: (value) =>
                         Intl.NumberFormat("de-DE").format(value),
                       color: theme.palette.primary.main,
                     },
                     {
-                      // data: financialData.expenses,
                       data: [
                         comparisonRetainedEarnings[3]?.value,
                         comparisonRetainedEarnings[4]?.value,
@@ -726,7 +797,6 @@ export default function Compare() {
                       showValue: true,
                       label: `${selectedComparisonCompanies?.[1]?.name}`,
 
-                      // label: "Current Liabilities",
                       valueFormatter: (value) =>
                         Intl.NumberFormat("de-DE").format(value),
                       color: theme.palette.error.main,
@@ -747,7 +817,6 @@ export default function Compare() {
                 <LineChart
                   xAxis={[
                     {
-                      // data: months,
                       data: years,
                       scaleType: "band",
                       tickLabelStyle: {
@@ -777,7 +846,6 @@ export default function Compare() {
                   ]}
                   series={[
                     {
-                      // data: financialData.revenue,
                       data: [
                         comparisonOperatingIncome[0]?.value,
                         comparisonOperatingIncome[1]?.value,
@@ -785,13 +853,11 @@ export default function Compare() {
                       ],
                       label: `${selectedComparisonCompanies?.[0]?.name}`,
 
-                      // label: "Current Assets",
                       valueFormatter: (value) =>
                         Intl.NumberFormat("de-DE").format(value),
                       color: theme.palette.primary.main,
                     },
                     {
-                      // data: financialData.expenses,
                       data: [
                         comparisonOperatingIncome[3]?.value,
                         comparisonOperatingIncome[4]?.value,
@@ -799,7 +865,6 @@ export default function Compare() {
                       ],
                       label: `${selectedComparisonCompanies?.[1]?.name}`,
 
-                      // label: "Current Liabilities",
                       valueFormatter: (value) =>
                         Intl.NumberFormat("de-DE").format(value),
                       color: theme.palette.error.main,
@@ -881,6 +946,17 @@ export default function Compare() {
                   height={300}
                   margin={{ top: 20, right: 20, bottom: 30, left: 40 }}
                 />
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                {geminiResponse ? (
+                  <span>{geminiResponse}</span>
+                ) : (
+                  <Button onClick={main}>What gemini thinks?</Button>
+                )}
               </CardContent>
             </Card>
           </Grid>

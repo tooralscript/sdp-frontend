@@ -65,7 +65,7 @@ export default function Navbar() {
               textDecoration: "none",
             }}
           >
-            SEC 10-K Annual Reports Analyzer
+            SEC 10K Annual Reports Analyzer
           </Typography>
 
           {/* Mobile menu */}
